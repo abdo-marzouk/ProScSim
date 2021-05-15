@@ -23,11 +23,20 @@ class SimWindow(QtWidgets.QWidget,Ui_SimulationWidget):
         Painter.setPen(Pen)
         for i in range(len(self.EventList)):
             if CurrX+(15*self.EventList[i][1]) > self.size().width():
-                self.resize(self.size().width() + 100,self.size().height())
+                self.resize((CurrX+(15*self.EventList[i][1])) + 20,self.size().height())
             Painter.drawLine(CurrX,CurrY-30,CurrX,CurrY)
-            Painter.drawLine(CurrX,CurrY,CurrX+(15*self.EventList[i][1]),CurrY)
+            if self.EventList[i][0] == "Idle":
+                Painter.drawLine(CurrX,CurrY,CurrX+40,CurrY)
+            else:
+                if self.EventList[i][1] < 2:
+                    Painter.drawLine(CurrX,CurrY,CurrX+30,CurrY)    
+                else:
+                    Painter.drawLine(CurrX,CurrY,CurrX+(15*self.EventList[i][1]),CurrY)
             TextPoint = QPoint()
-            TextPoint.setX(CurrX + (abs(CurrX - CurrX+10*self.EventList[i][1])//2))
+            if self.EventList[i][0] == "Idle":
+                TextPoint.setX(CurrX + ((abs(CurrX - CurrX+self.EventList[i][1]))+10//2))    
+            else:
+                TextPoint.setX(CurrX + (abs(CurrX - CurrX+10*self.EventList[i][1])//2))
             TextPoint.setY(CurrY - 20)
             Painter.drawText(TextPoint,self.EventList[i][0])
             AnotherTextPoint = QPoint()
@@ -35,7 +44,13 @@ class SimWindow(QtWidgets.QWidget,Ui_SimulationWidget):
             AnotherTextPoint.setY(CurrY + 20)
             Painter.drawText(AnotherTextPoint,str(CurrTime))
             CurrTime += self.EventList[i][1]
-            CurrX += 15*self.EventList[i][1]
+            if self.EventList[i][0] == "Idle":
+                CurrX += 40
+            else:
+                if self.EventList[i][1] < 2:
+                    CurrX += 30
+                else:
+                    CurrX += 15*self.EventList[i][1]
             if i == len(self.EventList) - 1:
                 Painter.drawLine(CurrX,CurrY-30,CurrX,CurrY)
                 AnotherTextPoint.setX(CurrX)
@@ -46,12 +61,19 @@ class SimWindow(QtWidgets.QWidget,Ui_SimulationWidget):
         self.KeyList = list(self.WaitingTimes.keys())
         self.KeyList.sort()
         for i in range(len(self.KeyList)):
-            S = f"{self.KeyList[i]}'s Waiting time is {self.WaitingTimes[self.KeyList[i]]}"
+            S = f"{self.KeyList[i]}'s Arrival time: {self.ArrivalTimes[self.KeyList[i]]}, Burst time: {self.BurstTimes[self.KeyList[i]]}, Waiting time:{self.WaitingTimes[self.KeyList[i]]}, Priority:{self.Priorities[self.KeyList[i]]}"
             TextPoint = QPoint(CurrX,CurrY+(i*20))
             Painter.drawText(TextPoint,S)
-    def TakeEventsAndTimes(self,EventList,WaitingTimes):
+        if self.size().height() <= CurrY+(len(self.KeyList)*20):
+            self.resize(self.size().width(),CurrY+(len(self.KeyList)*20) + 20)
+        Painter.drawText(30,CurrY+(len(self.KeyList)*20),f"Average waiting time = {sum(list(self.WaitingTimes.values())) / len(list(self.WaitingTimes.values()))}")
+    def TakeLists(self,EventList,WaitingTimes,BurstTimes,ArrivalTimes,Priorities):
         self.EventList = EventList
         self.WaitingTimes = WaitingTimes
+        self.BurstTimes = BurstTimes
+        self.ArrivalTimes = ArrivalTimes
+        self.Priorities = Priorities
+        self.resize(600,200)
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -67,20 +89,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             msg.exec()
         NoOfJobs = self.spinBox.value()
         if self.FCFSRadio.isChecked():
-            EventList,WaitingTimes = ProScSim(NoOfJobs,1)
+            EventList,WaitingTimes,BurstTimes,ArrivalTimes,Priorities = ProScSim(NoOfJobs,1)
         elif self.SJFNonRadio.isChecked():
-            EventList,WaitingTimes = ProScSim(NoOfJobs,2)
+            EventList,WaitingTimes,BurstTimes,ArrivalTimes,Priorities = ProScSim(NoOfJobs,2)
         elif self.SJFPreRadio.isChecked():
-            EventList,WaitingTimes = ProScSim(NoOfJobs,3)
+            EventList,WaitingTimes,BurstTimes,ArrivalTimes,Priorities = ProScSim(NoOfJobs,3)
         elif self.PrioRadio.isChecked():
-            EventList,WaitingTimes = ProScSim(NoOfJobs,4)
+            EventList,WaitingTimes,BurstTimes,ArrivalTimes,Priorities = ProScSim(NoOfJobs,4)
         else:
             msg = QMessageBox()
             msg.setWindowTitle("Mode not selected")
             msg.setText("You forgot to select the mode.")
             msg.exec()
         try:
-            SimWin.TakeEventsAndTimes(EventList,WaitingTimes)
+            SimWin.TakeLists(EventList,WaitingTimes,BurstTimes,ArrivalTimes,Priorities)
             SimWin.show()
         except:
             pass

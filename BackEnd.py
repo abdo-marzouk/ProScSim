@@ -1,7 +1,6 @@
 from  random import randint
 from time import sleep
 from itertools import groupby
-from typing import DefaultDict
 
 class BasicJob:
     def __init__(self, ArrivalTime : int, RemainingTime : int, ID : str):
@@ -12,7 +11,7 @@ class BasicJob:
         self.StartingTime = 0
         self.EndTime = 0
         self.WaitingTime = 0
-        self.Priority : int
+        self.Priority = 0
 
 def FillJobs(NoOfJobs:int,IsPriority:bool): 
     Jobs = [BasicJob(0,randint(1,15),"P1")] ## Starts the jobs list with one element with arrival time of 0
@@ -45,7 +44,11 @@ def ProScSim(NoOfJobs:int,SchedMode:int): ## Takes the number of proccsses and t
         for i in Jobs:
             if i.ArrivalTime <= CurrTime and i not in JobQueue and i not in JobsDone:  ## Adds the job into the job queue if it isn't there already and if it isn't done
                 JobQueue.append(i)
-        JobQueue = SortQueue(JobQueue,SchedMode) ## Calls the Function that sorts the queue based on the mode and updates the queue value
+        if SchedMode == 2:
+            if not WorkingOnJob:
+                JobQueue = SortQueue(JobQueue,SchedMode) ## Calls the Function that sorts the queue based on the mode and updates the queue value
+        else:
+            JobQueue = SortQueue(JobQueue,SchedMode)
         if len(JobQueue) == 0:  ## Job Queue is empty
             # sleep(1)
             EventList.append("Idle")
@@ -90,10 +93,13 @@ def ProScSim(NoOfJobs:int,SchedMode:int): ## Takes the number of proccsses and t
         CurrTime += 1
     BigList = []
     WaitingTimes = {i.ID:i.WaitingTime for i in JobsDone}
+    BurstTimes = {i.ID:i.BurstTime for i in JobsDone}
+    ArrivalTimes = {i.ID:i.ArrivalTime for i in JobsDone}
+    Priorities = {i.ID:i.Priority for i in JobsDone}
     for i in groupby(EventList):
         BigList.append([i[0],len(list(i[1]))])
     
-    return BigList,WaitingTimes
+    return BigList,WaitingTimes,BurstTimes,ArrivalTimes,Priorities
 
 if __name__ == '__main__':
     NoOfJobs = int(input("Please enter number of desired jobs: "))
@@ -107,5 +113,5 @@ if __name__ == '__main__':
         print("Invalid Input")
     else:
         EventList,WaitingTimes = ProScSim(NoOfJobs,SchedMode)
-        # for i in range(len(EventList)):
-            # print(EventList[i][1])
+        for i in range(len(EventList)):
+            print(EventList[i][1])
