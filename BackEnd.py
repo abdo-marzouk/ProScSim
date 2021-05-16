@@ -44,7 +44,7 @@ def ProScSim(NoOfJobs:int,SchedMode:int): ## Takes the number of proccsses and t
         for i in Jobs:
             if i.ArrivalTime <= CurrTime and i not in JobQueue and i not in JobsDone:  ## Adds the job into the job queue if it isn't there already and if it isn't done
                 JobQueue.append(i)
-        if SchedMode == 2:
+        if SchedMode == 1 or SchedMode == 2:
             if not WorkingOnJob:
                 JobQueue = SortQueue(JobQueue,SchedMode) ## Calls the Function that sorts the queue based on the mode and updates the queue value
         else:
