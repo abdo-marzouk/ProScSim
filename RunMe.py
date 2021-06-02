@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtCore import QPoint, Qt
-from PyQt5.QtGui import QFont, QPainter,QColor,QPen, QTextOption
+from PyQt5.QtGui import QFont, QPainter,QPen
 from MainMenu import *
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox
@@ -89,13 +89,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             msg.exec()
         NoOfJobs = self.spinBox.value()
         if self.FCFSRadio.isChecked():
-            EventList,WaitingTimes,BurstTimes,ArrivalTimes,Priorities = ProScSim(NoOfJobs,1)
+            EventList,WaitingTimes,BurstTimes,ArrivalTimes,Priorities = ProScSim(NoOfJobs,1,0)
         elif self.SJFNonRadio.isChecked():
-            EventList,WaitingTimes,BurstTimes,ArrivalTimes,Priorities = ProScSim(NoOfJobs,2)
+            EventList,WaitingTimes,BurstTimes,ArrivalTimes,Priorities = ProScSim(NoOfJobs,2,0)
         elif self.SJFPreRadio.isChecked():
-            EventList,WaitingTimes,BurstTimes,ArrivalTimes,Priorities = ProScSim(NoOfJobs,3)
+            EventList,WaitingTimes,BurstTimes,ArrivalTimes,Priorities = ProScSim(NoOfJobs,3,0)
         elif self.PrioRadio.isChecked():
-            EventList,WaitingTimes,BurstTimes,ArrivalTimes,Priorities = ProScSim(NoOfJobs,4)
+            EventList,WaitingTimes,BurstTimes,ArrivalTimes,Priorities = ProScSim(NoOfJobs,4,0)
+        elif self.RoundRobinRadio.isChecked():
+            QuantumNumber= self.QuantumSpin.value()
+            if QuantumNumber == 0:
+                msg = QMessageBox()
+                msg.setWindowTitle("Invalid Quantum")
+                msg.setText("Invalid input. Must be positive integer.")
+                msg.exec()
+            else:
+                EventList,WaitingTimes,BurstTimes,ArrivalTimes,Priorities = ProScSim(NoOfJobs,5,QuantumNumber)
         else:
             msg = QMessageBox()
             msg.setWindowTitle("Mode not selected")

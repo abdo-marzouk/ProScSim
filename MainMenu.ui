@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>675</width>
-    <height>497</height>
+    <height>342</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <property name="geometry">
      <rect>
       <x>270</x>
-      <y>240</y>
+      <y>280</y>
       <width>141</width>
       <height>31</height>
      </rect>
@@ -180,6 +180,35 @@
     </property>
     <property name="text">
      <string>ProScSim</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="RoundRobinRadio">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>230</y>
+      <width>191</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Times New Roman</family>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Round Robin with quantum:</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="QuantumSpin">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>235</y>
+      <width>51</width>
+      <height>21</height>
+     </rect>
     </property>
    </widget>
   </widget>
