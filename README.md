@@ -12,10 +12,19 @@ Todo:
 
 ~~3. Actually Implement this with a GUI.~~ - Done.
 
+Screenshots:
+Main menu:
+![image](https://user-images.githubusercontent.com/54773956/125167651-f2894a00-e1a1-11eb-8125-5689dae3d9fb.png)
+
+Grantt chart and process info window:
+![image](https://user-images.githubusercontent.com/54773956/125167669-02089300-e1a2-11eb-8874-f0b792d07438.png)
+
+Manual entries window:
+![image](https://user-images.githubusercontent.com/54773956/125167728-3d0ac680-e1a2-11eb-955a-0fc8319e39a2.png)
 
 What you need to use this:
 
-For the proof of concept text version aka "PoC.py": Python3.
+For the proof of concept text version aka "PoC.py": Python3. (WARNING: THIS IS OLD. MANY CHANGES HAVE BEEN MADE. USE THE GUI PLEASE.)
 
 For the GUI Version: Python3, PyQt5
 
