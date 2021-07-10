@@ -2,7 +2,7 @@ from random import randint
 from itertools import groupby
 
 class BasicJob:
-    def __init__(self, ArrivalTime : int, RemainingTime : int, ID : str):
+    def __init__(self, ArrivalTime : int, RemainingTime : int, ID : str, Priority:int = 0):
         self.ID = ID
         self.ArrivalTime = ArrivalTime
         self.BurstTime = RemainingTime
@@ -10,12 +10,12 @@ class BasicJob:
         self.StartingTime = 0
         self.EndTime = 0
         self.WaitingTime = 0
-        self.Priority = 0
+        self.Priority = Priority
         self.ChangedStartingTime = False
 
-def FillJobs(NoOfJobs:int,IsPriority:bool): 
-    Jobs = [BasicJob(0,randint(1,15),"P1")] ## Starts the jobs list with one element with arrival time of 0
-    Jobs.extend([BasicJob(randint(0,15),randint(1,15),f"P{x+2}") for x in range(NoOfJobs - 1)]) ## extends the job list with jobs with random arrival times and random initial remaining times (Burst times). 
+def FillJobsRandomly(NoOfJobs:int,IsPriority:bool):
+    Jobs = [BasicJob(0,randint(1,15),"P1")]
+    Jobs.extend([BasicJob(randint(0,15),randint(1,15),f"P{x+2}") for x in range(NoOfJobs - 1)])
     if IsPriority:
         for i in range(NoOfJobs):
             Jobs[i].Priority = randint(1,NoOfJobs)
@@ -23,60 +23,58 @@ def FillJobs(NoOfJobs:int,IsPriority:bool):
 
 def SortQueue(JobQueue:list,SchedMode:int) -> list:
     if SchedMode == 1:
-        JobQueue.sort(key=lambda x: x.ArrivalTime) ## Attempts to sort the queue based on arrival time.
-    elif SchedMode == 2 or SchedMode == 3:
-        JobQueue.sort(key=lambda x: x.RemainingTime) ## Attempts to sort the queue based on Remaining time.
+        JobQueue.sort(key=lambda x: (x.ArrivalTime, x.ID))
+    elif SchedMode == 2:
+        JobQueue.sort(key=lambda x: (x.BurstTime, x.ID))
+    elif SchedMode == 3:
+        JobQueue.sort(key=lambda x: (x.RemainingTime,x.ID))
     elif SchedMode == 4:
         JobQueue.sort(key=lambda x: (x.Priority,x.RemainingTime))
     return JobQueue
 
-def ProScSim(NoOfJobs:int,SchedMode:int,Quantum : int): ## Takes the number of proccsses and the scheduling mode
+def ProScSim(Jobs : list, SchedMode : int, Quantum : int = 0):
     CurrTime = 0
+    NoOfJobs = len(Jobs)
     EventList = []
-    WorkingOnJob = False
-    if SchedMode == 4:
-        Jobs = FillJobs(NoOfJobs,True)
-    else:
-        Jobs = FillJobs(NoOfJobs,False)
     JobQueue = []
     JobsDone = []
-    while len(JobsDone) != NoOfJobs: ## Loops until all jobs are done
+    WorkingOnJob = False
+    while len(JobsDone) != NoOfJobs:
         for i in Jobs:
-            if i.ArrivalTime <= CurrTime and i not in JobQueue and i not in JobsDone:  ## Adds the job into the job queue if it isn't there already and if it isn't done
+            if i.ArrivalTime <= CurrTime and i not in JobQueue and i not in JobsDone:
                 JobQueue.append(i)
         if SchedMode == 1 or SchedMode == 2:
             if not WorkingOnJob:
-                JobQueue = SortQueue(JobQueue,SchedMode) ## Calls the Function that sorts the queue based on the mode and updates the queue value
+                JobQueue = SortQueue(JobQueue,SchedMode)
         elif SchedMode == 3 or SchedMode == 4:
             JobQueue = SortQueue(JobQueue,SchedMode)
-        if len(JobQueue) == 0:  ## Job Queue is empty
+        if len(JobQueue) == 0:
             EventList.append("Idle")
-        else:  ## job queue is not empty
-            if SchedMode == 1 or SchedMode == 2: ## If the scheduling mode is non-preemptive it will keep working on the same proccess until it finishes it no matter what happens.
-                if WorkingOnJob == False:  ## If currently not working on a job then start working on the first one
+        else:
+            if SchedMode == 1 or SchedMode == 2:
+                if WorkingOnJob == False:
                     if JobQueue[0].ChangedStartingTime == False:
-                        JobQueue[0].StartingTime = CurrTime ## Set the starting time for the first job in the job queue as the current time
+                        JobQueue[0].StartingTime = CurrTime
                         JobQueue[0].ChangedStartingTime = True
-                    WorkingOnJob = True ## Sets the WorkingOnJob flag to True
-                if WorkingOnJob: ## Didn't write "else" because if WorkingOnJob was false then made it true it would ignore this block of code
-                    if JobQueue[0].RemainingTime > 0: ## the job is still not done
+                    WorkingOnJob = True
+                if WorkingOnJob:
+                    if JobQueue[0].RemainingTime > 0:
                         EventList.append(JobQueue[0].ID)
-                        JobQueue[0].RemainingTime -= 1  ## decrease the remaining time by 1
-                    else:  ## The job is done
-                        JobQueue[0].EndTime = CurrTime ## marks the ending time
-                        JobQueue[0].WaitingTime = JobQueue[0].StartingTime - JobQueue[0].ArrivalTime ## Calculates the waiting time
-                        JobsDone.append(JobQueue.pop(0)) ## Removes the completed job from the job queue and adds it to the completed jobs list
-                        WorkingOnJob = False ## No longer working on job
+                        JobQueue[0].RemainingTime -= 1
+                    else:
+                        JobQueue[0].EndTime = CurrTime
+                        JobQueue[0].WaitingTime = JobQueue[0].StartingTime - JobQueue[0].ArrivalTime
+                        JobsDone.append(JobQueue.pop(0))
+                        WorkingOnJob = False
                         CurrTime -= 1
-            
-            
-            elif SchedMode == 3 or SchedMode == 4:  ## The Scheduling mode is preemptive
+
+            elif SchedMode == 3 or SchedMode == 4:
                 if JobQueue[0].ChangedStartingTime == False:
-                    JobQueue[0].StartingTime = CurrTime ## Set the starting time for the first job in the job queue as the current time
+                    JobQueue[0].StartingTime = CurrTime
                     JobQueue[0].ChangedStartingTime = True
-                if JobQueue[0].RemainingTime > 0: ## the job is still not done
+                if JobQueue[0].RemainingTime > 0:
                     EventList.append(JobQueue[0].ID)
-                    JobQueue[0].RemainingTime -= 1  ## decrease the remaining time by 1
+                    JobQueue[0].RemainingTime -= 1
                 else:
                     JobQueue[0].EndTime = CurrTime
                     JobQueue[0].WaitingTime = JobQueue[0].EndTime - JobQueue[0].ArrivalTime - JobQueue[0].BurstTime
@@ -88,43 +86,31 @@ def ProScSim(NoOfJobs:int,SchedMode:int,Quantum : int): ## Takes the number of p
                         JobQueue.append(JobQueue.pop(0))
                         WorkingOnJob = False
                 if WorkingOnJob == False:
-                    if JobQueue[0].ChangedStartingTime == False:  ## If currently not working on a job then start working on the first one
-                        JobQueue[0].StartingTime = CurrTime ## Set the starting time for the first job in the job queue as the current time
+                    if JobQueue[0].ChangedStartingTime == False:
+                        JobQueue[0].StartingTime = CurrTime
                         JobQueue[0].ChangedStartingTime = True
-                    WorkingOnJob = True ## Sets the WorkingOnJob flag to True
-                if WorkingOnJob: ## Didn't write "else" because if WorkingOnJob was false then made it true it would ignore this block of code
-                    if JobQueue[0].RemainingTime > 0: ## the job is still not done
+                    WorkingOnJob = True
+                if WorkingOnJob:
+                    if JobQueue[0].RemainingTime > 0:
                         EventList.append(JobQueue[0].ID)
-                        JobQueue[0].RemainingTime -= 1  ## decrease the remaining time by 1
-                    else:  ## The job is done
-                        JobQueue[0].EndTime = CurrTime ## marks the ending time
-                        JobQueue[0].WaitingTime = JobQueue[0].EndTime - JobQueue[0].ArrivalTime - JobQueue[0].BurstTime ## Calculates the waiting time
-                        JobsDone.append(JobQueue.pop(0)) ## Removes the completed job from the job queue and adds it to the completed jobs list
-                        WorkingOnJob = False ## No longer working on job
+                        JobQueue[0].RemainingTime -= 1
+                    else:
+                        JobQueue[0].EndTime = CurrTime
+                        JobQueue[0].WaitingTime = JobQueue[0].EndTime - JobQueue[0].ArrivalTime - JobQueue[0].BurstTime 
+                        JobsDone.append(JobQueue.pop(0))
+                        WorkingOnJob = False
                         CurrTime -= 1
         CurrTime += 1
-    BigList = []
-    WaitingTimes = {i.ID:i.WaitingTime for i in JobsDone}
-    BurstTimes = {i.ID:i.BurstTime for i in JobsDone}
-    ArrivalTimes = {i.ID:i.ArrivalTime for i in JobsDone}
-    Priorities = {i.ID:i.Priority for i in JobsDone}
+    FinalEventList = []
     for i in groupby(EventList):
-        BigList.append([i[0],len(list(i[1]))])
-    
-    return BigList,WaitingTimes,BurstTimes,ArrivalTimes,Priorities
+        FinalEventList.append([i[0],len(list(i[1]))])
+    return FinalEventList,JobsDone
 
-if __name__ == '__main__':
-    NoOfJobs = int(input("Please enter number of desired jobs: "))
-    if NoOfJobs <=0:
-        print("Positive integers only")
-    print("Please enter the number in front of the desired scheduling mode")
-    print("Available modes are: 1 - First Come First Served, 2 - Shortest job first: Non-Preemptive")
-    print("3 - Shortest job first: Preemptive, 4 - Priority: Preemptive")
-    print("5 - Round Robin")
-    SchedMode = int(input("Enter Number: "))
-    if SchedMode not in range(1,6):
-        print("Invalid Input")
-    else:
-        BigList,WaitingTimes,BurstTimes,ArrivalTimes,Priorities = ProScSim(NoOfJobs,SchedMode,2)
-        for i in range(len(BigList)):
-            print(BigList[i][1])
+def MainHelperFunc(NoOfJobs : int, Jobs : list, SchedMode : int, IsManual : bool, Quantum : int = 0):
+    if not IsManual:
+        if SchedMode == 4:
+            Jobs = FillJobsRandomly(NoOfJobs,True)
+        else:
+            Jobs = FillJobsRandomly(NoOfJobs,False)
+    FinalEventList, JobsDone = ProScSim(Jobs,SchedMode,Quantum)
+    return FinalEventList, JobsDone
