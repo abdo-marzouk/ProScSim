@@ -23,9 +23,7 @@ Manual entries window:\
 
 What you need to use this:
 
-For the standalone exe version from the releases section: Nothing. Just download and run.
-
-For the proof of concept text version aka "PoC.py": Python3. (WARNING: THIS IS OLD. MANY CHANGES HAVE BEEN MADE. USE THE EXE RELEASE OR GUI VERSION PLEASE.)
+For the proof of concept text version aka "PoC.py": Python3. (WARNING: THIS IS OLD. MANY CHANGES HAVE BEEN MADE. USE THE GUI VERSION PLEASE.)
 
 For the GUI Version: Python3, PyQt5
 
