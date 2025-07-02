@@ -7,7 +7,7 @@ class BasicJob:
         self.ArrivalTime = ArrivalTime
         self.BurstTime = RemainingTime
         self.RemainingTime = RemainingTime
-        self.StartingTime = 0
+        self.StartingTime = 0 # random hora2
         self.EndTime = 0
         self.WaitingTime = 0
         self.Priority = Priority
