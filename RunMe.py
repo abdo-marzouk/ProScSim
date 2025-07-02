@@ -1,12 +1,14 @@
 import sys
-from PyQt5 import QtWidgets
+
 from PyQt5.QtCore import QPoint, Qt
-from PyQt5.QtGui import QFont, QPainter,QPen
+from PyQt5.QtGui import QFont, QPainter, QPen
 from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem
-from MainMenu import *
+
 from BackEnd import *
-from SimulationWidget import *
+from MainMenu import *
 from ManualEntry import *
+from SimulationWidget import *
+
 
 class DrawingWidget(QtWidgets.QWidget):
     def __init__(self,*args,**kwargs):
